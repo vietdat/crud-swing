@@ -20,6 +20,7 @@ public class hocbong {
     private JTextField toDate;
     private JTextField note;
     private JButton xóaButton;
+    private JButton sửaButton;
 
     public hocbong() {
         DefaultTableModel tableModel = new DefaultTableModel();
@@ -56,12 +57,41 @@ public class hocbong {
         });
         xóaButton.addMouseListener(new MouseAdapter() {
             @Override
+            public void mouseClicked(MouseEvent e) {
+                String studentCodeValue = studentCode.getText();
+                if (studentCodeValue == null) {
+                    return;
+                }
+                handleRemove(studentCodeValue);
+                super.mouseClicked(e);
+            }
+            @Override
             public void mousePressed(MouseEvent e) {
                 String studentCodeValue = studentCode.getText();
                 if (studentCodeValue == null) {
                     return;
                 }
                 handleRemove(studentCodeValue);
+                super.mousePressed(e);
+            }
+        });
+        sửaButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                String studentCodeValue = studentCode.getText();
+                if (studentCodeValue == null) {
+                    return;
+                }
+                handleUpdate(studentCodeValue);
+                super.mouseClicked(e);
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                String studentCodeValue = studentCode.getText();
+                if (studentCodeValue == null) {
+                    return;
+                }
+                handleUpdate(studentCodeValue);
                 super.mousePressed(e);
             }
         });
@@ -90,6 +120,45 @@ public class hocbong {
         } catch (Exception e) {
             System.out.println(e);
         }
+        clearText();
+        readFile();
+    }
+
+    public void handleUpdate(String studentCode) {
+        File inputFile = new File("filename.txt");
+        File tempFile = new File("myTempFile.txt");
+
+        try {
+
+            BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+
+            String currentLine;
+
+            while((currentLine = reader.readLine()) != null) {
+                // trim newline when comparing with lineToRemove
+                String trimmedLine = currentLine.trim();
+                if(trimmedLine.startsWith(studentCode + ";")) {
+                    String studentCodeValue = studentCode;
+                    String studentNameValue = studentName.getText();
+                    String loaihocbongValue = loaihocbong.getText();
+                    String xeploaiValue = xeploai.getText();
+                    String fromDateValue = fromDate.getText();
+                    String toDateValue = toDate.getText();
+                    String noteValue = note.getText();
+                    String valueLine = studentCodeValue + ";" + studentNameValue + ";" + loaihocbongValue + ";" + xeploaiValue + ";" +fromDateValue + ";" + toDateValue + ";" +noteValue+"\n";
+                    writer.write(valueLine + System.getProperty("line.separator"));
+                    continue;
+                }
+                writer.write(currentLine + System.getProperty("line.separator"));
+            }
+            writer.close();
+            reader.close();
+            boolean successful = tempFile.renameTo(inputFile);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        clearText();
         readFile();
     }
 
@@ -109,6 +178,11 @@ public class hocbong {
         }
         String valueLine = studentCodeValue + ";" + studentNameValue + ";" + loaihocbongValue + ";" + xeploaiValue + ";" +fromDateValue + ";" + toDateValue + ";" +noteValue+"\n";
         writeFile(valueLine);
+        clearText();
+        readFile();
+    }
+
+    public void clearText() {
         studentCode.setText("");
         studentName.setText("");
         loaihocbong.setText("");
@@ -116,9 +190,7 @@ public class hocbong {
         fromDate.setText("");
         toDate.setText("");
         note.setText("");
-        readFile();
     }
-
     public static void main(String[] args) {
         JFrame frame = new JFrame("Hello world");
         frame.setContentPane(new hocbong().rootPanel);
